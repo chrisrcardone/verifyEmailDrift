@@ -48,7 +48,7 @@ const sendEmail = async function (email, code) {
     replyTo: {
       email: process.env.REPLY_TO_EMAIL
     },
-    subject: `${process.env.COMPANY_NAME} Verification Code: ${code}`,
+    subject: `[${process.env.COMPANY_NAME}] Verification Code: ${code}`,
     content: [
       {
         type: 'text/html',
