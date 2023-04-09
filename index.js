@@ -25,7 +25,7 @@ app.listen(PORT, () => console.log(`Live on Port: ${PORT}`))
 
 //Code Generator
 const verificationCode = function () {
-  return crypto.randomInt(1000, 10000).toString();
+  return crypto.randomInt(100000, 999999).toString();
 };
 
 //Email Configuration
