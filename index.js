@@ -1,11 +1,9 @@
 // Importing needed packages for this Nodejs Server
 const express = require('express')
 const app = express()
-const bodyParser = require('body-parser')
 const request = require('request-promise-native');
-const fs = require('fs');
+const fs = require('fs').promises;
 const crypto = require('crypto');
-const util = require('util');
 const client = require('@sendgrid/mail');
 require('dotenv').config();
 
@@ -16,76 +14,78 @@ client.setApiKey(process.env.SENDGRID_API_KEY);
 const PORT = process.env.PORT || 8080
 
 // Starting Server
-app.use(bodyParser.json());
+app.use(express.json());
+app.listen(PORT, () => console.log(`Live on Port: ${PORT}`))
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
-app.listen(PORT, () => console.log(`Live on Port: ${PORT}`))
 
 //Code Generator
-const verificationCode = function () {
-  return crypto.randomInt(100000, 999999).toString();
-};
+const verificationCode = () => crypto.randomInt(100000, 999999).toString();
 
 //Email Configuration
 const sendEmail = async function (email, code) {
-  const emailTemplate = await util.promisify(fs.readFile)('./emailTemplate.html', 'utf8');
-  const message = {
-    personalizations: [
-      {
-        to: [
-          {
-            email: email
-          }
-        ]
-      }
-    ],
-    from: {
-      email: process.env.EMAIL_FROM_EMAIL,
-      name: process.env.EMAIL_FROM_NAME
-    },
-    replyTo: {
-      email: process.env.REPLY_TO_EMAIL
-    },
-    subject: `[${process.env.COMPANY_NAME}] Verification Code: ${code}`,
-    content: [
-      {
-        type: 'text/html',
-        value: emailTemplate.replaceAll('{{code}}', code).replaceAll('{{company}}', process.env.COMPANY_NAME)
-      }
-    ],
-    mailSettings: {
-      bypassListManagement: {
-        enable: true
-      },
-      footer: {
-        enable: false
-      },
-      sandboxMode: {
-        enable: false
-      }
-    },
-    trackingSettings: {
-      clickTracking: {
-        enable: false,
-        enableText: false
-      },
-      openTracking: {
-        enable: false
-      },
-      subscriptionTracking: {
-        enable: false
-      }
-    }
-  };
-  
   try {
-    await client.send(message);
-    console.log('Mail sent successfully');
+    const emailTemplate = await fs.readFile('./emailTemplate.html', 'utf8');
+    const message = {
+      personalizations: [
+        {
+          to: [
+            {
+              email: email
+            }
+          ]
+        }
+      ],
+      from: {
+        email: process.env.EMAIL_FROM_EMAIL,
+        name: process.env.EMAIL_FROM_NAME
+      },
+      replyTo: {
+        email: process.env.REPLY_TO_EMAIL
+      },
+      subject: `[${process.env.COMPANY_NAME}] Verification Code: ${code}`,
+      content: [
+        {
+          type: 'text/html',
+          value: emailTemplate.replaceAll('{{code}}', code).replaceAll('{{company}}', process.env.COMPANY_NAME)
+        }
+      ],
+      mailSettings: {
+        bypassListManagement: {
+          enable: true
+        },
+        footer: {
+          enable: false
+        },
+        sandboxMode: {
+          enable: false
+        }
+      },
+      trackingSettings: {
+        clickTracking: {
+          enable: false,
+          enableText: false
+        },
+        openTracking: {
+          enable: false
+        },
+        subscriptionTracking: {
+          enable: false
+        }
+      }
+    };
+  
+    try {
+      await client.send(message);
+      console.log('Mail sent successfully');
+    } catch (error) {
+      console.error(error);
+      console.error(error.response.body);
+    }
   } catch (error) {
     console.error(error);
-    console.error(error.response.body);
   }
 }
 
