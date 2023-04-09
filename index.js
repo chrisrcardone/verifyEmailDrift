@@ -24,15 +24,6 @@ app.use((err, req, res, next) => {
 //Code Generator
 const verificationCode = () => crypto.randomInt(100000, 999999).toString();
 
-//Standardized Error Logging
-function log(message, isError = false) {
-  if (isError) {
-    console.error(message);
-  } else {
-    console.log(message);
-  }
-}
-
 //Email Configuration
 const sendEmail = async function (email, code) {
   try {
@@ -88,12 +79,13 @@ const sendEmail = async function (email, code) {
   
     try {
       await client.send(message);
-      log('Mail sent successfully', false);
+      console.log('Mail sent successfully');
     } catch (error) {
-      log(error.response.body, true);
+      console.error(error);
+      console.error(error.response.body);
     }
   } catch (error) {
-    log(error, true);
+    console.error(error);
   }
 }
 
@@ -109,7 +101,7 @@ async function getDriftData(url) {
 
     return response.data;
   } catch (error) {
-    log(error, true);
+    console.error(error);
     return null;
   }
 }
@@ -128,35 +120,38 @@ async function sendDriftMessage(convoId, type, body) {
       json: true
     });
   } catch (error) {
-    log(error, true);
+    console.error(error);
   }
 }
-
-app.all('*', (req, res) => {
-  res.status(404).send('Page not found');
-});
 
 // This is the webhook to send Webhook Events to from Drift, here's how to have events sent here: https://devdocs.drift.com/docs/webhook-events-1
 // You need to subscribe to the `new_command_message` event
 // You need to add permissions: contact_read (allows us to get the email of the visitor), conversation_write (allows us to send the verification code into a private note in chat for agent's reference)
 app.post('/messages', async (req, res) => {
+  const convoId = req.body.data.conversationId;
+
+  // Confirming request has proper token, if in test mode, not requiring token
+  if (req.body.token !== process.env.DRIFT_VERIFICATION_TOKEN) {
+
+    // Rejecting request.
+    res.status(500).end()
+
+    return
+
+  }
+
+  // Confirming that the command message is `/verify` and not something else.
+  if (!req.body.data.body.includes("/verify") || req.body.data.author.type !== "user") {
+
+    res.status(200).end()
+
+    // Ending process as the command message did not match criteria
+    return
+
+  }
+  const code = verificationCode();
+
   try {
-    const {
-      token,
-      data: { conversationId: convoId, body: command, author },
-    } = req.body;
-
-    if (token !== process.env.DRIFT_VERIFICATION_TOKEN) {
-      res.status(500).end();
-      return;
-    }
-
-    if (!command.includes("/verify") || author.type !== "user") {
-      res.status(200).end();
-      return;
-    }
-
-    const code = verificationCode();
     const conversation = await getDriftData(`https://driftapi.com/conversations/${convoId}`);
     const contact = await getDriftData(`https://driftapi.com/contacts/${conversation.contactId}`);
 
@@ -171,9 +166,10 @@ app.post('/messages', async (req, res) => {
     await sendDriftMessage(convoId, 'chat', `Reply here with your verification code once you've retreived it.`);
     await sendDriftMessage(convoId, 'private_note', `Verification Code: ${code} | Sent To: ${contact.attributes.email}`);
 
-    res.send('Verification process executed.');
   } catch (error) {
-    log(error, true);
-    res.status(500).send('Something went wrong');
+    console.error(error);
   }
+
+  res.send('Verification process executed.');
+
 })
