@@ -162,9 +162,9 @@ app.post('/messages', async (req, res) => {
     }
 
     await sendEmail(contact.attributes.email, code);
-    await sendDriftMessage(convoId, 'private_note', `Success! Their verification code is ${code}. We've sent this to their email, ${contact.attributes.email}.`);
     await sendDriftMessage(convoId, 'chat', `I've sent your verification code to ${contact.attributes.email} from ${process.env.EMAIL_FROM_EMAIL}. Please allow up to two minutes for this email to arrive and check your spam folder should it not be in your inbox.`);
     await sendDriftMessage(convoId, 'chat', `Reply here with your verification code once you've retreived it.`);
+    await sendDriftMessage(convoId, 'private_note', `Verification Code: ${code} | Sent To: ${contact.attributes.email}`);
 
   } catch (error) {
     console.error(error);
