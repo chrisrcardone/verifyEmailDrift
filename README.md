@@ -10,7 +10,7 @@ We do not store the code, conversation details, or contact details on the server
 # .ENV VARIABLES
 - PORT
 - DRIFT_API_KEY
-  - Your API Key from Drift which is found by [Setting Up a Drift Custom App](https://devdocs.drift.com/docs/quick-start) once you **[install the app into your Drift Account](https://devdocs.drift.com/docs/quick-start#3-install-it-to-your-drift-account-) which the credentials of you've used to log into the Drift Dev Portal where you configured the custom app.**
+  - Your API Key from Drift which is found by [Setting Up a Drift Custom App](https://devdocs.drift.com/docs/quick-start) once you **[install the app into your Drift Account](https://devdocs.drift.com/docs/quick-start#3-install-it-to-your-drift-account-) which the credentials of you've used to log into the [Drift Dev Portal](https://dev.drift.com/) where you configured the custom app.**
 - DRIFT_VERIFICATION_TOKEN
   - Verification Token for Your Drift App which can be found [following these steps](https://devdocs.drift.com/docs/webhook-events-1#verification-token) in the Drift Dev Docs.
 - EMAIL_FROM_NAME
