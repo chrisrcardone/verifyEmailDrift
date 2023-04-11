@@ -152,7 +152,6 @@ app.post('/messages', async (req, res) => {
   const code = verificationCode();
 
   try {
-    const conversation = await getDriftData(`https://driftapi.com/conversations/${convoId}`);
     const contact = await getDriftData(`https://driftapi.com/contacts/${conversation.contactId}`);
 
     if (!contact.attributes.email) {
