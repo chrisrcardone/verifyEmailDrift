@@ -1,6 +1,6 @@
 # HOW IT WORKS
 
-1.  Agent Types "/verify" to kickoff an API call powered by Drift's Custom App Webhook for "[new_command_message](https://devdocs.drift.com/docs/webhook-events-1#event-types)" and with access to the following scopes which will need to be added to [the scopes your custom app requests](https://devdocs.drift.com/docs/quick-start#2-give-your-app-permission-scopes) when configuring the quick setup:
+1.  The Agent types "/verify" into the Drift Conversation and sends it as a private note to kickoff an API call powered by Drift's Custom App Webhook for "[new_command_message](https://devdocs.drift.com/docs/webhook-events-1#event-types)" and with access to the following scopes which will need to be added to [the scopes your custom app requests](https://devdocs.drift.com/docs/quick-start#2-give-your-app-permission-scopes) when configuring the quick setup:
 
     1.  Conversation_read: so the server can gather the chatter's contact ID which is used to collect their email using the contact_read scope to send the verification code to
     2.  Contact_read: so the server can gather the email of the chatter using the contact ID retrieved using the conversation_read scope to send them a verification code
